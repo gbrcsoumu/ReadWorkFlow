@@ -1,19 +1,12 @@
 ﻿Imports Microsoft.VisualBasic.FileIO
 
 Module Module1
-    Public LoginID As String                                ' FileMakerのログインID
-    Public LoginPassWord As String                          ' FileMakerのログインパスワード
-    Public Const DataBaseName As String = "退勤管理test01"  ' FileMakerのデータベース名
-    Public Const MemberNameTable As String = "職員一覧"     ' 職員名簿のテーブル名
-    Public Const MemberLogTable As String = "出退勤記録"      ' 退勤管理のテーブル名
-    Public Const DateLogTable As String = "出退勤一覧"      ' 出退勤一覧のテーブル名
-    Public Const CodeTable1 As String = "出勤コード一覧"     ' 出退コード一覧のテーブル名
-    Public Const CodeTable2 As String = "退勤コード一覧"     ' 退勤コード一覧のテーブル名
-    Public Const GooutTable As String = "外出記録"          ' 外出記録のテーブル名
-    Public Const ReturnTable As String = "戻り記録"          ' 戻り記録のテーブル名
-    Public Const CardMasterKeyString = "GBRC 2020"          ' Felicaカードの暗号化のキー
-    Public Const ClosePassWord As String = "exit"
-    Public Const ListReadTime As String = "03：00：00"            ' 職員一覧を読み込む時刻
+    Public LoginID As String                                    ' FileMakerのログインID
+    Public LoginPassWord As String                              ' FileMakerのログインパスワード
+    Public Const DataBaseName As String = "届出管理"            ' FileMakerのデータベース名
+    Public Const HolidayTable As String = "休暇等届"            ' 休暇等届のテーブル名
+    Public Const BussinessTripTable As String = "出張命令書"    ' 出張命令書のテーブル名
+    Public Const HolidayWorkTable As String = "休日出勤命令書"  ' 休日出勤命令書のテーブル名
 
     Public Const Path1 As String = "C:\CSV\workflow1"
     Public Const Path2 As String = "C:\CSV\workflow2"
@@ -32,15 +25,18 @@ Module Module1
         'Dim File2 As String() = ReadCSV(Path2)
         ''Dim File3 As String() = ReadCSV(Path3)
 
-        If ReadWorkFlow(Path1) = True Then
+        If ReadWorkFlow1(Path1) = True Then
 
         End If
 
     End Sub
 
-    Function ReadWorkFlow(ByVal path As String) As Boolean
+    Function ReadWorkFlow1(ByVal path As String) As Boolean
+        Dim db As New OdbcDbIf
+        Dim tb As DataTable
+        Dim Sql_Command As String
 
-        ReadWorkFlow = False
+        ReadWorkFlow1 = False
         Dim WildCard1 As String
         'Dim Count As Integer = 0
         Dim ff() As String    ', flag() As Boolean
@@ -58,6 +54,53 @@ Module Module1
                 If data.Length > 0 Then
                     If data.Length > 1 Then
 
+                        db.Connect()
+
+                        Dim No As String
+                        Dim Name As String
+                        Dim DateTime1 As String
+                        Dim Cat As String
+                        Dim Kind1 As String, Kind2 As String, Kind As String
+                        Dim StDate As String, EdDate As String
+                        Dim StTime As String, EdTime As String
+                        Dim DayCount As String
+                        Dim TotalDayCount As String
+                        Dim ReMarks As String
+
+                        For j As Integer = 1 To data.Length - 1
+
+                            No = data(j)(21)
+                            Name = data(j)(5)
+                            DateTime1 = data(j)(7).Replace("/", "-") + ":00"
+                            Cat = data(j)(11).Replace("（変更前の日付を備考に記載）", "")
+                            Kind1 = data(j)(12).Replace("（備考欄に詳細記載）", "").Replace("/", vbCrLf)
+                            Kind2 = data(j)(13).Replace("（備考欄に詳細記載）", "").Replace("/", vbCrLf)
+                            If Kind1 <> "" Then
+                                Kind = Kind1
+                            Else
+                                Kind = Kind2
+                            End If
+                            StDate = data(j)(14).Replace("/", "-")
+                            StTime = data(j)(15) + ":00"
+                            EdDate = data(j)(17).Replace("/", "-")
+                            EdTime = data(j)(16) + ":00"
+                            DayCount = data(j)(18)
+                            If DayCount = "" Then DayCount = "0"
+                            TotalDayCount = data(j)(19)
+                            If TotalDayCount = "" Then TotalDayCount = "0"
+                            ReMarks = data(j)(20).Replace("'", "''")
+
+                            Sql_Command = "INSERT INTO """ + HolidayTable + """"
+                            Sql_Command += " (""職員番号"", ""職員名"", ""申請日"", ""申請区分"", ""種類"", ""開始日"", ""開始時間"", ""終了日"", ""終了時間"", ""今回休暇日数"", ""有給休暇累計"", ""備考"", ""入力"")"
+                            Sql_Command += " VALUES ('" + No + "','" + Name + "',TIMESTAMP '" + DateTime1 + "','" + Cat + "','" + Kind + "',DATE '" + StDate + "',TIME '" + StTime + "',DATE '" + EdDate + "',TIME '" + EdTime + "'"
+                            Sql_Command += "," + DayCount + "," + TotalDayCount + ",'" + ReMarks + "','未入力')"
+                            tb = db.ExecuteSql(Sql_Command)
+
+
+                        Next
+
+                        db.Disconnect()
+
                     End If
 
                     Dim file2 As String = outPath1 + "\" + System.IO.Path.GetFileName(ff(i))
@@ -69,13 +112,11 @@ Module Module1
     End Function
 
     ''' -----------------------------------------------------------------------------
-    ''' <summary>
     ''' CSVファイルの読込処理
-    ''' </summary>
-    ''' <param name="astrFileName">ファイル名
-    ''' <param name="ablnTab">区切りの指定(True:タブ区切り, False:カンマ区切り)
-    ''' <param name="ablnQuote">引用符フラグ(True:引用符で囲まれている, False:囲まれていない)
-    ''' <returns>読込結果の文字列の2次元配列</returns>
+    ''' param name="astrFileName">ファイル名
+    ''' param name="ablnTab"区切りの指定(True:タブ区切り, False:カンマ区切り)
+    ''' param name="ablnQuote"引用符フラグ(True:引用符で囲まれている, False:囲まれていない)
+    ''' return読込結果の文字列の2次元配列returns
     ''' -----------------------------------------------------------------------------
     Public Function ReadCsv(ByVal astrFileName As String,
                          ByVal ablnTab As Boolean,

@@ -22,8 +22,8 @@ Public Class OdbcDbIf
     ''' パスワード
     ''' タイムアウト値
     ''' 
-    Public Sub Connect(Optional ByVal dbn As String = "退勤管理test01",
-                       Optional ByVal uid As String = "admin",
+    Public Sub Connect(Optional ByVal dbn As String = DataBaseName,
+                       Optional ByVal uid As String = "Admin",
                        Optional ByVal pas As String = "soumu1",
                        Optional ByVal tot As Integer = -1)
 
