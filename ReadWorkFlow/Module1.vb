@@ -169,12 +169,6 @@ Module Module1
                             aa += ","
                             bb += ","
 
-                            'Sql_Command = "INSERT INTO """ + HolidayTable + """"
-                            'Sql_Command += " (""職員番号"", ""職員名"", ""申請日"", ""申請区分"", ""種類"", ""開始日"", ""開始時間"", ""終了日"", ""終了時間"", ""今回休暇日数"", ""有給休暇累計"", ""備考"", ""入力"")"
-                            'Sql_Command += " VALUES ('" + No + "','" + Name + "',TIMESTAMP '" + DateTime1 + "','" + Cat + "','" + Kind + "',DATE '" + StDate + "',TIME '" + StTime + "',DATE '" + EdDate + "',TIME '" + EdTime + "'"
-                            'Sql_Command += "," + DayCount + "," + TotalDayCount + ",'" + ReMarks + "','未入力')"
-
-
                             aa += """入力"""
                             bb += "'未入力'"
                             aa += ","
