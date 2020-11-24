@@ -15,11 +15,22 @@ Module Module1
     Public Const outPath1 As String = "C:\CSV2\workflow1"
     Public Const outPath2 As String = "C:\CSV2\workflow2"
     Public Const outPath3 As String = "C:\CSV2\workflow3"
+
+    Public Const delPath1 As String = "C:\CSV3\workflow1"
+    Public Const delPath2 As String = "C:\CSV3\workflow2"
+    Public Const delPath3 As String = "C:\CSV3\workflow3"
+
+    Public Const Version As String = "Ver 1.00"
+
     Sub Main()
 
         If System.IO.Directory.Exists(outPath1) = False Then System.IO.Directory.CreateDirectory(outPath1)
         If System.IO.Directory.Exists(outPath2) = False Then System.IO.Directory.CreateDirectory(outPath2)
         If System.IO.Directory.Exists(outPath3) = False Then System.IO.Directory.CreateDirectory(outPath3)
+
+        If System.IO.Directory.Exists(delPath1) = False Then System.IO.Directory.CreateDirectory(delPath1)
+        If System.IO.Directory.Exists(delPath2) = False Then System.IO.Directory.CreateDirectory(delPath2)
+        If System.IO.Directory.Exists(delPath3) = False Then System.IO.Directory.CreateDirectory(delPath3)
 
         'Dim File1 As String() = ReadCSV(Path1)
         'Dim File2 As String() = ReadCSV(Path2)
@@ -56,23 +67,39 @@ Module Module1
 
                         db.Connect()
 
-                        Dim No As String
-                        Dim Name As String
-                        Dim DateTime1 As String
-                        Dim Cat As String
-                        Dim Kind1 As String, Kind2 As String, Kind As String
-                        Dim StDate As String, EdDate As String
-                        Dim StTime As String, EdTime As String
-                        Dim DayCount As String
-                        Dim TotalDayCount As String
-                        Dim ReMarks As String
 
                         For j As Integer = 1 To data.Length - 1
+                            Dim aa As String = "", bb As String = ""
 
+                            Dim No As String
                             No = data(j)(21)
+                            aa += """職員番号"""
+                            bb += "'" + No + "'"
+                            aa += ","
+                            bb += ","
+
+                            Dim Name As String
                             Name = data(j)(5)
+                            aa += """職員名"""
+                            bb += "'" + Name + "'"
+                            aa += ","
+                            bb += ","
+
+                            Dim DateTime1 As String
                             DateTime1 = data(j)(7).Replace("/", "-") + ":00"
+                            aa += """申請日"""
+                            bb += "TIMESTAMP '" + DateTime1 + "'"
+                            aa += ","
+                            bb += ","
+
+                            Dim Cat As String
                             Cat = data(j)(11).Replace("（変更前の日付を備考に記載）", "")
+                            aa += """申請区分"""
+                            bb += "'" + Cat + "'"
+                            aa += ","
+                            bb += ","
+
+                            Dim Kind1 As String, Kind2 As String, Kind As String
                             Kind1 = data(j)(12).Replace("（備考欄に詳細記載）", "").Replace("/", vbCrLf)
                             Kind2 = data(j)(13).Replace("（備考欄に詳細記載）", "").Replace("/", vbCrLf)
                             If Kind1 <> "" Then
@@ -80,20 +107,78 @@ Module Module1
                             Else
                                 Kind = Kind2
                             End If
+                            aa += """種類"""
+                            bb += "'" + Kind + "'"
+                            aa += ","
+                            bb += ","
+
+                            Dim StDate As String, EdDate As String
+                            Dim StTime As String, EdTime As String
                             StDate = data(j)(14).Replace("/", "-")
+                            aa += """開始日"""
+                            bb += "DATE '" + StDate + "'"
+                            aa += ","
+                            bb += ","
+
                             StTime = data(j)(15) + ":00"
+                            aa += """開始時間"""
+                            bb += "TIME '" + StTime + "'"
+                            aa += ","
+                            bb += ","
+
                             EdDate = data(j)(17).Replace("/", "-")
+                            aa += """終了日"""
+                            bb += "DATE '" + EdDate + "'"
+                            aa += ","
+                            bb += ","
+
                             EdTime = data(j)(16) + ":00"
+                            aa += """終了時間"""
+                            bb += "TIME '" + EdTime + "'"
+                            aa += ","
+                            bb += ","
+
+                            Dim DayCount As String
                             DayCount = data(j)(18)
                             If DayCount = "" Then DayCount = "0"
+                            aa += """今回休暇日数"""
+                            bb += DayCount
+                            aa += ","
+                            bb += ","
+
+                            Dim TotalDayCount As String
                             TotalDayCount = data(j)(19)
                             If TotalDayCount = "" Then TotalDayCount = "0"
-                            ReMarks = data(j)(20).Replace("'", "''")
+                            aa += """有給休暇累計"""
+                            bb += TotalDayCount
+                            aa += ","
+                            bb += ","
 
-                            Sql_Command = "INSERT INTO """ + HolidayTable + """"
-                            Sql_Command += " (""職員番号"", ""職員名"", ""申請日"", ""申請区分"", ""種類"", ""開始日"", ""開始時間"", ""終了日"", ""終了時間"", ""今回休暇日数"", ""有給休暇累計"", ""備考"", ""入力"")"
-                            Sql_Command += " VALUES ('" + No + "','" + Name + "',TIMESTAMP '" + DateTime1 + "','" + Cat + "','" + Kind + "',DATE '" + StDate + "',TIME '" + StTime + "',DATE '" + EdDate + "',TIME '" + EdTime + "'"
-                            Sql_Command += "," + DayCount + "," + TotalDayCount + ",'" + ReMarks + "','未入力')"
+                            Dim ReMarks As String
+                            ReMarks = data(j)(20).Replace("'", "''")
+                            aa += """備考"""
+                            bb += "'" + ReMarks + "'"
+                            aa += ","
+                            bb += ","
+
+                            'Sql_Command = "INSERT INTO """ + HolidayTable + """"
+                            'Sql_Command += " (""職員番号"", ""職員名"", ""申請日"", ""申請区分"", ""種類"", ""開始日"", ""開始時間"", ""終了日"", ""終了時間"", ""今回休暇日数"", ""有給休暇累計"", ""備考"", ""入力"")"
+                            'Sql_Command += " VALUES ('" + No + "','" + Name + "',TIMESTAMP '" + DateTime1 + "','" + Cat + "','" + Kind + "',DATE '" + StDate + "',TIME '" + StTime + "',DATE '" + EdDate + "',TIME '" + EdTime + "'"
+                            'Sql_Command += "," + DayCount + "," + TotalDayCount + ",'" + ReMarks + "','未入力')"
+
+
+                            aa += """入力"""
+                            bb += "'未入力'"
+                            aa += ","
+                            bb += ","
+
+                            aa += """バージョン"""
+                            bb += "'" + Version + "'"
+                            'aa += ","
+                            'bb += ","
+
+                            Sql_Command = "INSERT INTO """ + HolidayTable + """ (" + aa + ") VALUES (" + bb + ")"
+
                             tb = db.ExecuteSql(Sql_Command)
 
 
@@ -101,10 +186,15 @@ Module Module1
 
                         db.Disconnect()
 
+                        Dim file2 As String = outPath1 + "\" + System.IO.Path.GetFileName(ff(i))
+                        System.IO.File.Move(ff(i), file2)
+                    Else
+                        Dim file2 As String = delPath1 + "\" + System.IO.Path.GetFileName(ff(i))
+                        System.IO.File.Move(ff(i), file2)
+
                     End If
 
-                    Dim file2 As String = outPath1 + "\" + System.IO.Path.GetFileName(ff(i))
-                    System.IO.File.Move(ff(i), file2)
+
                 End If
             Next
         End If
