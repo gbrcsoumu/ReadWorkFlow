@@ -39,6 +39,12 @@ Module Module1
         If ReadWorkFlow1(Path1) = True Then
 
         End If
+        If ReadWorkFlow2(Path2) = True Then
+
+        End If
+        If ReadWorkFlow3(Path3) = True Then
+
+        End If
 
     End Sub
 
@@ -71,29 +77,25 @@ Module Module1
                         For j As Integer = 1 To data.Length - 1
                             Dim aa As String = "", bb As String = ""
 
-                            Dim No As String
-                            No = data(j)(21)
+                            Dim No As String = data(j)(21)
                             aa += """職員番号"""
                             bb += "'" + No + "'"
                             aa += ","
                             bb += ","
 
-                            Dim Name As String
-                            Name = data(j)(5)
+                            Dim Name As String = data(j)(5)
                             aa += """職員名"""
                             bb += "'" + Name + "'"
                             aa += ","
                             bb += ","
 
-                            Dim DateTime1 As String
-                            DateTime1 = data(j)(7).Replace("/", "-") + ":00"
+                            Dim DateTime1 As String = data(j)(7).Replace("/", "-") + ":00"
                             aa += """申請日"""
                             bb += "TIMESTAMP '" + DateTime1 + "'"
                             aa += ","
                             bb += ","
 
-                            Dim Cat As String
-                            Cat = data(j)(11).Replace("（変更前の日付を備考に記載）", "")
+                            Dim Cat As String = data(j)(11).Replace("（変更前の日付を備考に記載）", "")
                             aa += """申請区分"""
                             bb += "'" + Cat + "'"
                             aa += ","
@@ -114,48 +116,54 @@ Module Module1
 
                             Dim StDate As String, EdDate As String
                             Dim StTime As String, EdTime As String
-                            StDate = data(j)(14).Replace("/", "-")
-                            aa += """開始日"""
-                            bb += "DATE '" + StDate + "'"
-                            aa += ","
-                            bb += ","
 
-                            StTime = data(j)(15) + ":00"
-                            aa += """開始時間"""
-                            bb += "TIME '" + StTime + "'"
-                            aa += ","
-                            bb += ","
+                            If data(j)(14) <> "" Then
+                                StDate = data(j)(14).Replace("/", "-")
+                                aa += """開始日"""
+                                bb += "DATE '" + StDate + "'"
+                                aa += ","
+                                bb += ","
+                            End If
 
-                            EdDate = data(j)(17).Replace("/", "-")
-                            aa += """終了日"""
-                            bb += "DATE '" + EdDate + "'"
-                            aa += ","
-                            bb += ","
+                            If data(j)(15) <> "" Then
+                                StTime = data(j)(15) + ":00"
+                                aa += """開始時間"""
+                                bb += "TIME '" + StTime + "'"
+                                aa += ","
+                                bb += ","
+                            End If
 
-                            EdTime = data(j)(16) + ":00"
-                            aa += """終了時間"""
-                            bb += "TIME '" + EdTime + "'"
-                            aa += ","
-                            bb += ","
+                            If data(j)(17) <> "" Then
+                                EdDate = data(j)(17).Replace("/", "-")
+                                aa += """終了日"""
+                                bb += "DATE '" + EdDate + "'"
+                                aa += ","
+                                bb += ","
+                            End If
 
-                            Dim DayCount As String
-                            DayCount = data(j)(18)
+                            If data(j)(16) <> "" Then
+                                EdTime = data(j)(16) + ":00"
+                                aa += """終了時間"""
+                                bb += "TIME '" + EdTime + "'"
+                                aa += ","
+                                bb += ","
+                            End If
+
+                            Dim DayCount As String = data(j)(18)
                             If DayCount = "" Then DayCount = "0"
                             aa += """今回休暇日数"""
                             bb += DayCount
                             aa += ","
                             bb += ","
 
-                            Dim TotalDayCount As String
-                            TotalDayCount = data(j)(19)
+                            Dim TotalDayCount As String = data(j)(19)
                             If TotalDayCount = "" Then TotalDayCount = "0"
                             aa += """有給休暇累計"""
                             bb += TotalDayCount
                             aa += ","
                             bb += ","
 
-                            Dim ReMarks As String
-                            ReMarks = data(j)(20).Replace("'", "''")
+                            Dim ReMarks As String = data(j)(20).Replace("'", "''")
                             aa += """備考"""
                             bb += "'" + ReMarks + "'"
                             aa += ","
@@ -197,9 +205,525 @@ Module Module1
 
                 End If
             Next
+            ReadWorkFlow1 = True
         End If
 
     End Function
+
+
+    Function ReadWorkFlow2(ByVal path As String) As Boolean
+        Dim db As New OdbcDbIf
+        Dim tb As DataTable
+        Dim Sql_Command As String
+
+        ReadWorkFlow2 = False
+        Dim WildCard1 As String
+        'Dim Count As Integer = 0
+        Dim ff() As String    ', flag() As Boolean
+
+        WildCard1 = "*.csv"
+
+        Dim nn As Integer = 0
+
+        ff = System.IO.Directory.GetFiles(path, WildCard1, System.IO.SearchOption.AllDirectories)
+        nn = ff.Length
+        If nn > 0 Then
+            Dim data As String()()
+            For i As Integer = 0 To nn - 1
+                data = ReadCsv(ff(i), False, False)
+                If data.Length > 0 Then
+                    If data.Length > 1 Then
+
+                        db.Connect()
+
+
+                        For j As Integer = 1 To data.Length - 1
+                            Dim aa As String = "", bb As String = ""
+
+                            Dim No As String = data(j)(11)
+                            aa += """職員番号"""
+                            bb += "'" + No + "'"
+                            aa += ","
+                            bb += ","
+
+                            Dim Name As String = data(j)(5)
+                            aa += """職員名"""
+                            bb += "'" + Name + "'"
+                            aa += ","
+                            bb += ","
+
+                            Dim DateTime1 As String = data(j)(7).Replace("/", "-") + ":00"
+                            aa += """申請日"""
+                            bb += "TIMESTAMP '" + DateTime1 + "'"
+                            aa += ","
+                            bb += ","
+
+                            Dim Cat As String = data(j)(12).Replace("（変更・中止：内容等を備考欄に入力）", "")
+                            aa += """申請区分"""
+                            bb += "'" + Cat + "'"
+                            aa += ","
+                            bb += ","
+
+
+
+                            Dim StDate As String, EdDate As String
+                            Dim StTime As String, EdTime As String
+
+                            If data(j)(15) <> "" Then
+                                StDate = data(j)(15).Replace("/", "-")
+                                aa += """出張開始日"""
+                                bb += "DATE '" + StDate + "'"
+                                aa += ","
+                                bb += ","
+                            End If
+
+                            If data(j)(16) <> "" Then
+                                StTime = data(j)(16) + ":00"
+                                aa += """出発時間"""
+                                bb += "TIME '" + StTime + "'"
+                                aa += ","
+                                bb += ","
+                            End If
+
+                            If data(j)(17) <> "" Then
+                                EdDate = data(j)(17).Replace("/", "-")
+                                aa += """出張終了日"""
+                                bb += "DATE '" + EdDate + "'"
+                                aa += ","
+                                bb += ","
+                            End If
+
+                            If data(j)(18) <> "" Then
+                                EdTime = data(j)(18) + ":00"
+                                aa += """帰着時間"""
+                                bb += "TIME '" + EdTime + "'"
+                                aa += ","
+                                bb += ","
+                            End If
+
+                            Dim Zenpaku As String = data(j)(19)
+                            aa += """前泊・後泊"""
+                            bb += "'" + Zenpaku + "'"
+                            aa += ","
+                            bb += ","
+
+
+                            Dim Dest1 As String = data(j)(21)
+                            aa += """行先＿所内"""
+                            bb += "'" + Dest1 + "'"
+                            aa += ","
+                            bb += ","
+
+                            Dim Dest2 As String = data(j)(22)
+                            aa += """行先＿所外"""
+                            bb += "'" + Dest2 + "'"
+                            aa += ","
+                            bb += ","
+
+                            Dim Address As String = data(j)(23)
+                            aa += """行先＿所在地"""
+                            bb += "'" + Address + "'"
+                            aa += ","
+                            bb += ","
+
+                            Dim Method As String = data(j)(24)
+                            aa += """移動手段"""
+                            bb += "'" + Method + "'"
+                            aa += ","
+                            bb += ","
+
+
+                            Dim Job As String = data(j)(20)
+                            aa += """用務"""
+                            bb += "'" + Job + "'"
+                            aa += ","
+                            bb += ","
+
+                            Dim ReMarks As String = data(j)(28).Replace("'", "''")
+                            aa += """備考"""
+                            bb += "'" + ReMarks + "'"
+                            aa += ","
+                            bb += ","
+
+                            Dim Member As String = data(j)(31)
+                            aa += """同行者の有無"""
+                            bb += "'" + Member + "'"
+                            aa += ","
+                            bb += ","
+
+                            Dim No1 As String = data(j)(14)
+                            aa += """同行者職員番号1"""
+                            bb += "'" + No1 + "'"
+                            aa += ","
+                            bb += ","
+
+                            Dim Name1 As String = data(j)(13)
+                            aa += """同行者氏名1"""
+                            bb += "'" + Name1 + "'"
+                            aa += ","
+                            bb += ","
+
+                            Dim No2 As String = data(j)(32)
+                            aa += """同行者職員番号2"""
+                            bb += "'" + No2 + "'"
+                            aa += ","
+                            bb += ","
+
+                            Dim Name2 As String = data(j)(34)
+                            aa += """同行者氏名2"""
+                            bb += "'" + Name2 + "'"
+                            aa += ","
+                            bb += ","
+
+                            Dim No3 As String = data(j)(33)
+                            aa += """同行者職員番号3"""
+                            bb += "'" + No3 + "'"
+                            aa += ","
+                            bb += ","
+
+                            Dim Name3 As String = data(j)(35)
+                            aa += """同行者氏名3"""
+                            bb += "'" + Name3 + "'"
+                            aa += ","
+                            bb += ","
+
+
+                            Dim CostExist As String = data(j)(30)
+                            aa += """費用の有無"""
+                            bb += "'" + CostExist + "'"
+                            aa += ","
+                            bb += ","
+
+                            Dim CostTerm As String = data(j)(27)
+                            aa += """費用の内容"""
+                            bb += "'" + CostTerm + "'"
+                            aa += ","
+                            bb += ","
+
+                            Dim Cost As String = data(j)(25)
+                            If Cost = "" Then Cost = "0"
+                            aa += """費用"""
+                            bb += Cost
+                            aa += ","
+                            bb += ","
+
+                            aa += """入力"""
+                            bb += "'未入力'"
+                            aa += ","
+                            bb += ","
+
+                            aa += """バージョン"""
+                            bb += "'" + Version + "'"
+                            'aa += ","
+                            'bb += ","
+
+                            Sql_Command = "INSERT INTO """ + BussinessTripTable + """ (" + aa + ") VALUES (" + bb + ")"
+
+                            tb = db.ExecuteSql(Sql_Command)
+
+
+                        Next
+
+                        db.Disconnect()
+
+                        Dim file2 As String = outPath2 + "\" + System.IO.Path.GetFileName(ff(i))
+                        System.IO.File.Move(ff(i), file2)
+                    Else
+                        Dim file2 As String = delPath2 + "\" + System.IO.Path.GetFileName(ff(i))
+                        System.IO.File.Move(ff(i), file2)
+
+                    End If
+
+
+                End If
+            Next
+            ReadWorkFlow2 = True
+        End If
+
+    End Function
+
+
+    Function ReadWorkFlow3(ByVal path As String) As Boolean
+        Dim db As New OdbcDbIf
+        Dim tb As DataTable
+        Dim Sql_Command As String
+
+        ReadWorkFlow3 = False
+        Dim WildCard1 As String
+        'Dim Count As Integer = 0
+        Dim ff() As String    ', flag() As Boolean
+
+        WildCard1 = "*.csv"
+
+        Dim nn As Integer = 0
+
+        ff = System.IO.Directory.GetFiles(path, WildCard1, System.IO.SearchOption.AllDirectories)
+        nn = ff.Length
+        If nn > 0 Then
+            Dim data As String()()
+            For i As Integer = 0 To nn - 1
+                data = ReadCsv(ff(i), False, False)
+                If data.Length > 0 Then
+                    If data.Length > 1 Then
+
+                        db.Connect()
+
+
+                        For j As Integer = 1 To data.Length - 1
+                            Dim aa As String = "", bb As String = ""
+
+                            Dim No As String = data(j)(11)
+                            aa += """職員番号"""
+                            bb += "'" + No + "'"
+                            aa += ","
+                            bb += ","
+
+                            Dim Name As String = data(j)(5)
+                            aa += """職員名"""
+                            bb += "'" + Name + "'"
+                            aa += ","
+                            bb += ","
+
+                            Dim DateTime1 As String = data(j)(7).Replace("/", "-") + ":00"
+                            aa += """申請日"""
+                            bb += "TIMESTAMP '" + DateTime1 + "'"
+                            aa += ","
+                            bb += ","
+
+                            Dim Cat As String = data(j)(12).Replace("（変更・中止：理由を備考欄に入力）", "")
+                            aa += """申請区分"""
+                            bb += "'" + Cat + "'"
+                            aa += ","
+                            bb += ","
+
+                            If data(j)(13) <> "" Then
+                                Dim WorkDate1 As String = data(j)(13).Replace("/", "-")
+                                aa += """休日出勤日1"""
+                                bb += "DATE '" + WorkDate1 + "'"
+                                aa += ","
+                                bb += ","
+                            End If
+
+                            If data(j)(14) <> "" Then
+                                Dim StTime1 As String = data(j)(14) + ":00"
+                                aa += """開始時間1"""
+                                bb += "TIME '" + StTime1 + "'"
+                                aa += ","
+                                bb += ","
+                            End If
+
+                            If data(j)(15) <> "" Then
+                                Dim EdTime1 As String = data(j)(15) + ":00"
+                                aa += """終了時間1"""
+                                bb += "TIME '" + EdTime1 + "'"
+                                aa += ","
+                                bb += ","
+                            End If
+
+                            If data(j)(16) <> "" Then
+                                Dim SubDate1 As String = data(j)(16).Replace("/", "-")
+                                aa += """振替休日1"""
+                                bb += "DATE '" + SubDate1 + "'"
+                                aa += ","
+                                bb += ","
+                            End If
+
+                            Dim DayLength1 As String = data(j)(36)
+                            aa += """振替休日の長さ1"""
+                            bb += "'" + DayLength1 + "'"
+                            aa += ","
+                            bb += ","
+
+                            If data(j)(17) <> "" Then
+                                Dim WorkDate2 As String = data(j)(17).Replace("/", "-")
+                                aa += """休日出勤日2"""
+                                bb += "DATE '" + WorkDate2 + "'"
+                                aa += ","
+                                bb += ","
+                            End If
+
+                            If data(j)(18) <> "" Then
+                                Dim StTime2 As String = data(j)(18) + ":00"
+                                aa += """開始時間2"""
+                                bb += "TIME '" + StTime2 + "'"
+                                aa += ","
+                                bb += ","
+                            End If
+
+                            If data(j)(19) <> "" Then
+                                Dim EdTime2 As String = data(j)(19) + ":00"
+                                aa += """終了時間2"""
+                                bb += "TIME '" + EdTime2 + "'"
+                                aa += ","
+                                bb += ","
+                            End If
+
+                            If data(j)(20) <> "" Then
+                                Dim SubDate2 As String = data(j)(20).Replace("/", "-")
+                                aa += """振替休日2"""
+                                bb += "DATE '" + SubDate2 + "'"
+                                aa += ","
+                                bb += ","
+                            End If
+
+                            Dim DayLength2 As String = data(j)(37)
+                            aa += """振替休日の長さ2"""
+                            bb += "'" + DayLength2 + "'"
+                            aa += ","
+                            bb += ","
+
+                            Dim Job As String = data(j)(21)
+                            aa += """用務"""
+                            bb += "'" + Job + "'"
+                            aa += ","
+                            bb += ","
+
+                            Dim TriFlag As String = data(j)(22)
+                            aa += """出張の有無"""
+                            bb += "'" + TriFlag + "'"
+                            aa += ","
+                            bb += ","
+
+                            Dim Zenpaku As String = data(j)(33)
+                            aa += """前泊・後泊"""
+                            bb += "'" + Zenpaku + "'"
+                            aa += ","
+                            bb += ","
+
+                            Dim Dest1 As String = data(j)(23)
+                            aa += """行先＿所内"""
+                            bb += "'" + Dest1 + "'"
+                            aa += ","
+                            bb += ","
+
+                            Dim Dest2 As String = data(j)(24)
+                            aa += """行先＿所外"""
+                            bb += "'" + Dest2 + "'"
+                            aa += ","
+                            bb += ","
+
+                            Dim Address As String = data(j)(39)
+                            aa += """所外所在地"""
+                            bb += "'" + Address + "'"
+                            aa += ","
+                            bb += ","
+
+                            Dim Method As String = data(j)(38)
+                            aa += """移動手段"""
+                            bb += "'" + Method + "'"
+                            aa += ","
+                            bb += ","
+
+                            Dim TripStDate1 As String, TripEdDate1 As String
+                            Dim TripStTime1 As String, TripEdTime1 As String
+                            Dim TripStDate2 As String, TripEdDate2 As String
+                            Dim TripStTime2 As String, TripEdTime2 As String
+
+                            If data(j)(25) <> "" Then
+                                TripStDate1 = data(j)(25).Replace("/", "-")
+                                aa += """開始日1"""
+                                bb += "DATE '" + TripStDate1 + "'"
+                                aa += ","
+                                bb += ","
+                            End If
+
+                            If data(j)(29) <> "" Then
+                                TripStTime1 = data(j)(29) + ":00"
+                                aa += """出発時間1"""
+                                bb += "TIME '" + TripStTime1 + "'"
+                                aa += ","
+                                bb += ","
+                            End If
+
+                            If data(j)(26) <> "" Then
+                                TripEdDate1 = data(j)(26).Replace("/", "-")
+                                aa += """終了日1"""
+                                bb += "DATE '" + TripEdDate1 + "'"
+                                aa += ","
+                                bb += ","
+                            End If
+
+                            If data(j)(30) <> "" Then
+                                TripEdTime1 = data(j)(30) + ":00"
+                                aa += """帰着時間1"""
+                                bb += "TIME '" + TripEdTime1 + "'"
+                                aa += ","
+                                bb += ","
+                            End If
+
+                            If data(j)(27) <> "" Then
+                                TripStDate2 = data(j)(27).Replace("/", "-")
+                                aa += """開始日2"""
+                                bb += "DATE '" + TripStDate2 + "'"
+                                aa += ","
+                                bb += ","
+                            End If
+
+                            If data(j)(31) <> "" Then
+                                TripStTime2 = data(j)(31) + ":00"
+                                aa += """出発時間2"""
+                                bb += "TIME '" + TripStTime2 + "'"
+                                aa += ","
+                                bb += ","
+                            End If
+
+                            If data(j)(28) <> "" Then
+                                TripEdDate2 = data(j)(28).Replace("/", "-")
+                                aa += """終了日2"""
+                                bb += "DATE '" + TripEdDate2 + "'"
+                                aa += ","
+                                bb += ","
+                            End If
+
+                            If data(j)(32) <> "" Then
+                                TripEdTime2 = data(j)(32) + ":00"
+                                aa += """帰着時間2"""
+                                bb += "TIME '" + TripEdTime2 + "'"
+                                aa += ","
+                                bb += ","
+                            End If
+
+                            Dim ReMarks As String = data(j)(34).Replace("'", "''")
+                            aa += """備考"""
+                            bb += "'" + ReMarks + "'"
+                            aa += ","
+                            bb += ","
+
+                            aa += """入力"""
+                            bb += "'未入力'"
+                            aa += ","
+                            bb += ","
+
+                            aa += """バージョン"""
+                            bb += "'" + Version + "'"
+                            'aa += ","
+                            'bb += ","
+
+                            Sql_Command = "INSERT INTO """ + HolidayWorkTable + """ (" + aa + ") VALUES (" + bb + ")"
+
+                            tb = db.ExecuteSql(Sql_Command)
+
+
+                        Next
+
+                        db.Disconnect()
+
+                        Dim file2 As String = outPath3 + "\" + System.IO.Path.GetFileName(ff(i))
+                        System.IO.File.Move(ff(i), file2)
+                    Else
+                        Dim file2 As String = delPath3 + "\" + System.IO.Path.GetFileName(ff(i))
+                        System.IO.File.Move(ff(i), file2)
+
+                    End If
+
+
+                End If
+            Next
+            ReadWorkFlow3 = True
+        End If
+
+    End Function
+
 
     ''' -----------------------------------------------------------------------------
     ''' CSVファイルの読込処理
