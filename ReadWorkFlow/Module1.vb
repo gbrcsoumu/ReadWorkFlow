@@ -36,24 +36,24 @@ Module Module1
         'Dim File2 As String() = ReadCSV(Path2)
         ''Dim File3 As String() = ReadCSV(Path3)
 
-        If ReadWorkFlow1(Path1) = True Then
+        If ReadWorkFlow1(Path1) = 0 Then
 
         End If
-        If ReadWorkFlow2(Path2) = True Then
+        If ReadWorkFlow2(Path2) = 0 Then
 
         End If
-        If ReadWorkFlow3(Path3) = True Then
+        If ReadWorkFlow3(Path3) = 0 Then
 
         End If
 
     End Sub
 
-    Function ReadWorkFlow1(ByVal path As String) As Boolean
+    Function ReadWorkFlow1(ByVal path As String) As Integer
         Dim db As New OdbcDbIf
         Dim tb As DataTable
         Dim Sql_Command As String
 
-        ReadWorkFlow1 = False
+        ReadWorkFlow1 = -1
         Dim WildCard1 As String
         'Dim Count As Integer = 0
         Dim ff() As String    ', flag() As Boolean
@@ -73,6 +73,8 @@ Module Module1
 
                         db.Connect()
 
+                        'Sql_Command2 = "SELECT * FROM """ + DateLogTable + """ WHERE (""職員番号"" = '" & value & "' AND ""日付"" = DATE '" + D1 + " ')"
+                        'tb2 = db.ExecuteSql(Sql_Command2)
 
                         For j As Integer = 1 To data.Length - 1
                             Dim aa As String = "", bb As String = ""
@@ -179,11 +181,14 @@ Module Module1
                             'aa += ","
                             'bb += ","
 
-                            Sql_Command = "INSERT INTO """ + HolidayTable + """ (" + aa + ") VALUES (" + bb + ")"
+                            Dim Sql_Command2 As String = "SELECT ""職員番号"" FROM """ + HolidayTable + """ WHERE (""職員番号"" = '" & No & "' AND ""申請日"" = TIMESTAMP '" + DateTime1 + " ')"
+                            Dim tb2 As DataTable = db.ExecuteSql(Sql_Command2)
+                            Dim n2 As Integer = tb2.Rows.Count
 
-                            tb = db.ExecuteSql(Sql_Command)
-
-
+                            If n2 = 0 Then
+                                Sql_Command = "INSERT INTO """ + HolidayTable + """ (" + aa + ") VALUES (" + bb + ")"
+                                tb = db.ExecuteSql(Sql_Command)
+                            End If
                         Next
 
                         db.Disconnect()
@@ -199,18 +204,19 @@ Module Module1
 
                 End If
             Next
-            ReadWorkFlow1 = True
+            ReadWorkFlow1 = 0
+
         End If
 
     End Function
 
 
-    Function ReadWorkFlow2(ByVal path As String) As Boolean
+    Function ReadWorkFlow2(ByVal path As String) As Integer
         Dim db As New OdbcDbIf
         Dim tb As DataTable
         Dim Sql_Command As String
 
-        ReadWorkFlow2 = False
+        ReadWorkFlow2 = -1
         Dim WildCard1 As String
         'Dim Count As Integer = 0
         Dim ff() As String    ', flag() As Boolean
@@ -411,10 +417,15 @@ Module Module1
                             'aa += ","
                             'bb += ","
 
-                            Sql_Command = "INSERT INTO """ + BussinessTripTable + """ (" + aa + ") VALUES (" + bb + ")"
+                            Dim Sql_Command2 As String = "SELECT ""職員番号"" FROM """ + BussinessTripTable + """ WHERE (""職員番号"" = '" & No & "' AND ""申請日"" = TIMESTAMP '" + DateTime1 + " ')"
+                            Dim tb2 As DataTable = db.ExecuteSql(Sql_Command2)
+                            Dim n2 As Integer = tb2.Rows.Count
 
-                            tb = db.ExecuteSql(Sql_Command)
+                            If n2 = 0 Then
+                                Sql_Command = "INSERT INTO """ + BussinessTripTable + """ (" + aa + ") VALUES (" + bb + ")"
 
+                                tb = db.ExecuteSql(Sql_Command)
+                            End If
 
                         Next
 
@@ -431,18 +442,18 @@ Module Module1
 
                 End If
             Next
-            ReadWorkFlow2 = True
+            ReadWorkFlow2 = 0
         End If
 
     End Function
 
 
-    Function ReadWorkFlow3(ByVal path As String) As Boolean
+    Function ReadWorkFlow3(ByVal path As String) As Integer
         Dim db As New OdbcDbIf
         Dim tb As DataTable
         Dim Sql_Command As String
 
-        ReadWorkFlow3 = False
+        ReadWorkFlow3 = -1
         Dim WildCard1 As String
         'Dim Count As Integer = 0
         Dim ff() As String    ', flag() As Boolean
@@ -693,10 +704,16 @@ Module Module1
                             'aa += ","
                             'bb += ","
 
-                            Sql_Command = "INSERT INTO """ + HolidayWorkTable + """ (" + aa + ") VALUES (" + bb + ")"
 
-                            tb = db.ExecuteSql(Sql_Command)
+                            Dim Sql_Command2 As String = "SELECT ""職員番号"" FROM """ + HolidayWorkTable + """ WHERE (""職員番号"" = '" & No & "' AND ""申請日"" = TIMESTAMP '" + DateTime1 + " ')"
+                            Dim tb2 As DataTable = db.ExecuteSql(Sql_Command2)
+                            Dim n2 As Integer = tb2.Rows.Count
 
+                            If n2 = 0 Then
+                                Sql_Command = "INSERT INTO """ + HolidayWorkTable + """ (" + aa + ") VALUES (" + bb + ")"
+
+                                tb = db.ExecuteSql(Sql_Command)
+                            End If
 
                         Next
 
@@ -713,7 +730,7 @@ Module Module1
 
                 End If
             Next
-            ReadWorkFlow3 = True
+            ReadWorkFlow3 = 0
         End If
 
     End Function
