@@ -165,6 +165,13 @@ Module Module1
                             aa += ","
                             bb += ","
 
+                            Dim TimeCount As String = data(j)(24)
+                            If TimeCount = "" Then TimeCount = "0"
+                            aa += """今回休暇時間"""
+                            bb += TimeCount
+                            aa += ","
+                            bb += ","
+
                             Dim ReMarks As String = data(j)(20).Replace("'", "''")
                             aa += """備考"""
                             bb += "'" + ReMarks + "'"
