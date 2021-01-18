@@ -166,9 +166,8 @@ Module Module1
                             bb += ","
 
                             Dim TimeCount As String = data(j)(24)
-                            If TimeCount = "" Then TimeCount = "0"
                             aa += """今回休暇時間"""
-                            bb += TimeCount
+                            bb += "'" + TimeCount + "'"
                             aa += ","
                             bb += ","
 
