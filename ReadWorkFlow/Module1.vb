@@ -187,7 +187,8 @@ Module Module1
                             'aa += ","
                             'bb += ","
 
-                            Dim Sql_Command2 As String = "SELECT ""職員番号"" FROM """ + HolidayTable + """ WHERE (""職員番号"" = '" & No & "' AND ""申請日"" = TIMESTAMP '" + DateTime1 + " ')"
+                            Dim Sql_Command2 As String = "SELECT ""職員番号"" FROM """ + HolidayTable +
+                                """ WHERE (""職員番号"" = '" + No + "' AND ""申請日"" = TIMESTAMP '" + DateTime1 + "' AND ""開始日"" = DATE '" + StDate + " ')"
                             Dim tb2 As DataTable = db.ExecuteSql(Sql_Command2)
                             Dim n2 As Integer = tb2.Rows.Count
 
@@ -423,7 +424,8 @@ Module Module1
                             'aa += ","
                             'bb += ","
 
-                            Dim Sql_Command2 As String = "SELECT ""職員番号"" FROM """ + BussinessTripTable + """ WHERE (""職員番号"" = '" & No & "' AND ""申請日"" = TIMESTAMP '" + DateTime1 + " ')"
+                            Dim Sql_Command2 As String = "SELECT ""職員番号"" FROM """ + BussinessTripTable +
+                                """ WHERE (""職員番号"" = '" + No + "' AND ""申請日"" = TIMESTAMP '" + DateTime1 + "' AND ""出張開始日"" = DATE '" + StDate + " ')"
                             Dim tb2 As DataTable = db.ExecuteSql(Sql_Command2)
                             Dim n2 As Integer = tb2.Rows.Count
 
@@ -482,6 +484,7 @@ Module Module1
 
                         For j As Integer = 1 To data.Length - 1
                             Dim aa As String = "", bb As String = ""
+                            Dim WorkDate1 As String
 
                             Dim No As String = data(j)(11)
                             aa += """職員番号"""
@@ -508,7 +511,7 @@ Module Module1
                             bb += ","
 
                             If data(j)(13) <> "" Then
-                                Dim WorkDate1 As String = data(j)(13).Replace("/", "-")
+                                WorkDate1 = data(j)(13).Replace("/", "-")
                                 aa += """休日出勤日1"""
                                 bb += "DATE '" + WorkDate1 + "'"
                                 aa += ","
@@ -706,12 +709,16 @@ Module Module1
                             bb += ","
 
                             aa += """バージョン"""
+
+
                             bb += "'" + Version + "'"
                             'aa += ","
                             'bb += ","
 
+                            Dim Sql_Command2 As String = "SELECT ""職員番号"" FROM """ + HolidayWorkTable +
+                                """ WHERE (""職員番号"" = '" + No + "' AND ""申請日"" = TIMESTAMP '" + DateTime1 + "' AND ""休日出勤日1"" = DATE '" + WorkDate1 + " ')"
 
-                            Dim Sql_Command2 As String = "SELECT ""職員番号"" FROM """ + HolidayWorkTable + """ WHERE (""職員番号"" = '" & No & "' AND ""申請日"" = TIMESTAMP '" + DateTime1 + " ')"
+                            'Dim Sql_Command2 As String = "SELECT ""職員番号"" FROM """ + HolidayWorkTable + """ WHERE (""職員番号"" = '" & No & "' AND ""申請日"" = TIMESTAMP '" + DateTime1 + " ')"
                             Dim tb2 As DataTable = db.ExecuteSql(Sql_Command2)
                             Dim n2 As Integer = tb2.Rows.Count
 
