@@ -709,8 +709,6 @@ Module Module1
                             bb += ","
 
                             aa += """バージョン"""
-
-
                             bb += "'" + Version + "'"
                             'aa += ","
                             'bb += ","
