@@ -7,18 +7,22 @@ Module Module1
     Public Const HolidayTable As String = "休暇等届"            ' 休暇等届のテーブル名
     Public Const BussinessTripTable As String = "出張命令書"    ' 出張命令書のテーブル名
     Public Const HolidayWorkTable As String = "休日出勤命令書"  ' 休日出勤命令書のテーブル名
+    Public Const HomeWorkTable As String = "在宅勤務許可申請"   ' 在宅勤務許可申請のテーブル名
 
     Public Const Path1 As String = "C:\CSV\workflow1"
     Public Const Path2 As String = "C:\CSV\workflow2"
     Public Const Path3 As String = "C:\CSV\workflow3"
+    Public Const Path4 As String = "C:\CSV\workflow4"
 
     Public Const outPath1 As String = "C:\CSV2\workflow1"
     Public Const outPath2 As String = "C:\CSV2\workflow2"
     Public Const outPath3 As String = "C:\CSV2\workflow3"
+    Public Const outPath4 As String = "C:\CSV2\workflow4"
 
     Public Const delPath1 As String = "C:\CSV3\workflow1"
     Public Const delPath2 As String = "C:\CSV3\workflow2"
     Public Const delPath3 As String = "C:\CSV3\workflow3"
+    Public Const delPath4 As String = "C:\CSV3\workflow4"
 
     Public Const Version As String = "Ver 1.00"
 
@@ -27,10 +31,12 @@ Module Module1
         If System.IO.Directory.Exists(outPath1) = False Then System.IO.Directory.CreateDirectory(outPath1)
         If System.IO.Directory.Exists(outPath2) = False Then System.IO.Directory.CreateDirectory(outPath2)
         If System.IO.Directory.Exists(outPath3) = False Then System.IO.Directory.CreateDirectory(outPath3)
+        If System.IO.Directory.Exists(outPath4) = False Then System.IO.Directory.CreateDirectory(outPath4)
 
         If System.IO.Directory.Exists(delPath1) = False Then System.IO.Directory.CreateDirectory(delPath1)
         If System.IO.Directory.Exists(delPath2) = False Then System.IO.Directory.CreateDirectory(delPath2)
         If System.IO.Directory.Exists(delPath3) = False Then System.IO.Directory.CreateDirectory(delPath3)
+        If System.IO.Directory.Exists(delPath4) = False Then System.IO.Directory.CreateDirectory(delPath4)
 
         'Dim File1 As String() = ReadCSV(Path1)
         'Dim File2 As String() = ReadCSV(Path2)
@@ -43,6 +49,9 @@ Module Module1
 
         End If
         If ReadWorkFlow3(Path3) = 0 Then
+
+        End If
+        If ReadWorkFlow4(Path4) = 0 Then
 
         End If
 
@@ -742,6 +751,259 @@ Module Module1
                 End If
             Next
             ReadWorkFlow3 = 0
+        End If
+
+    End Function
+
+    Function ReadWorkFlow4(ByVal path As String) As Integer
+        Dim db As New OdbcDbIf
+        Dim tb As DataTable
+        Dim Sql_Command As String
+
+        ReadWorkFlow4 = -1
+        Dim WildCard1 As String
+        'Dim Count As Integer = 0
+        Dim ff() As String    ', flag() As Boolean
+
+        WildCard1 = "*.csv"
+
+        Dim nn As Integer = 0
+
+        ff = System.IO.Directory.GetFiles(path, WildCard1, System.IO.SearchOption.AllDirectories)
+        nn = ff.Length
+        If nn > 0 Then
+            Dim data As String()()
+            For i As Integer = 0 To nn - 1
+                data = ReadCsv(ff(i), False, False)
+                If data.Length > 0 Then
+                    If data.Length > 1 Then
+
+                        db.Connect()
+
+                        'Sql_Command2 = "SELECT * FROM """ + DateLogTable + """ WHERE (""職員番号"" = '" & value & "' AND ""日付"" = DATE '" + D1 + " ')"
+                        'tb2 = db.ExecuteSql(Sql_Command2)
+
+                        For j As Integer = 1 To data.Length - 1
+                            Dim aa As String = "", bb As String = ""
+
+                            Dim No As String = data(j)(13)
+                            aa += """職員番号"""
+                            bb += "'" + No + "'"
+                            aa += ","
+                            bb += ","
+
+                            Dim Name As String = data(j)(5)
+                            aa += """職員名"""
+                            bb += "'" + Name + "'"
+                            aa += ","
+                            bb += ","
+
+                            Dim DateTime1 As String = data(j)(8).Replace("/", "-") + ":00"
+                            aa += """申請日"""
+                            bb += "TIMESTAMP '" + DateTime1 + "'"
+                            aa += ","
+                            bb += ","
+
+                            Dim Cat As String = data(j)(12).Replace("（変更前の日付を備考に記載）", "")
+                            aa += """申請区分"""
+                            bb += "'" + Cat + "'"
+                            aa += ","
+                            bb += ","
+
+                            'Dim Kind1 As String, Kind2 As String, Kind As String
+                            'Kind1 = data(j)(12).Replace("（備考欄に詳細記載）", "").Replace("/", vbCrLf)
+                            'Kind2 = data(j)(13).Replace("（備考欄に詳細記載）", "").Replace("/", vbCrLf)
+                            'If Kind1 <> "" Then
+                            '    Kind = Kind1
+                            'Else
+                            '    Kind = Kind2
+                            'End If
+                            'aa += """種類"""
+                            'bb += "'" + Kind + "'"
+                            'aa += ","
+                            'bb += ","
+
+                            Dim Date1 As String, Date2 As String, Date3 As String, Date4 As String
+
+                            If data(j)(14) <> "" Then
+                                Date1 = data(j)(14).Replace("/", "-")
+                                aa += """在宅勤務日1"""
+                                bb += "DATE '" + Date1 + "'"
+                                aa += ","
+                                bb += ","
+                            End If
+
+                            If data(j)(15) <> "" Then
+                                Date2 = data(j)(15).Replace("/", "-")
+                                aa += """在宅勤務日2"""
+                                bb += "DATE '" + Date2 + "'"
+                                aa += ","
+                                bb += ","
+                            End If
+
+                            If data(j)(16) <> "" Then
+                                Date3 = data(j)(16).Replace("/", "-")
+                                aa += """在宅勤務日3"""
+                                bb += "DATE '" + Date3 + "'"
+                                aa += ","
+                                bb += ","
+                            End If
+
+                            If data(j)(17) <> "" Then
+                                Date4 = data(j)(17).Replace("/", "-")
+                                aa += """在宅勤務日4"""
+                                bb += "DATE '" + Date4 + "'"
+                                aa += ","
+                                bb += ","
+                            End If
+
+                            If data(j)(18) <> "" Then
+                                Dim 終日以外選択 As String = data(j)(18).Replace("'", "''")
+                                aa += """終日以外選択"""
+                                bb += "'" + 終日以外選択 + "'"
+                                aa += ","
+                                bb += ","
+                            End If
+
+                            If data(j)(19) <> "" Then
+                                Dim 終日以外の理由 As String = data(j)(19).Replace("'", "''")
+                                aa += """終日以外の理由"""
+                                bb += "'" + 終日以外の理由 + "'"
+                                aa += ","
+                                bb += ","
+                            End If
+
+                            If data(j)(20) <> "" Then
+                                Dim 連絡先 As String = data(j)(20).Replace("'", "''")
+                                aa += """連絡先"""
+                                bb += "'" + 連絡先 + "'"
+                                aa += ","
+                                bb += ","
+                            End If
+
+                            If data(j)(21) <> "" Then
+                                Dim 実務する業務 As String = data(j)(21).Replace("'", "''")
+                                aa += """実務する業務"""
+                                bb += "'" + 実務する業務 + "'"
+                                aa += ","
+                                bb += ","
+                            End If
+
+                            If data(j)(22) <> "" Then
+                                Dim パソコンのOS As String = data(j)(22).Replace("'", "''")
+                                aa += """パソコンのOS"""
+                                bb += "'" + パソコンのOS + "'"
+                                aa += ","
+                                bb += ","
+                            End If
+
+                            If data(j)(23) <> "" Then
+                                Dim セキュリティソフト As String = data(j)(23).Replace("'", "''")
+                                aa += """セキュリティソフト"""
+                                bb += "'" + セキュリティソフト + "'"
+                                aa += ","
+                                bb += ","
+                            End If
+
+                            If data(j)(24) <> "" Then
+                                Dim 使用するパソコン As String = data(j)(24).Replace("'", "''")
+                                aa += """使用するパソコン"""
+                                bb += "'" + 使用するパソコン + "'"
+                                aa += ","
+                                bb += ","
+                            End If
+
+                            If data(j)(25) <> "" Then
+                                Dim リモートデスクトップの方法 As String = data(j)(25).Replace("'", "''")
+                                aa += """リモートデスクトップの方法"""
+                                bb += "'" + リモートデスクトップの方法 + "'"
+                                aa += ","
+                                bb += ","
+                            End If
+
+                            If data(j)(26) <> "" Then
+                                Dim 自宅PC確認事項1 As String = data(j)(26).Replace("'", "''")
+                                aa += """自宅PC確認事項1"""
+                                bb += "'" + 自宅PC確認事項1 + "'"
+                                aa += ","
+                                bb += ","
+                            End If
+
+                            If data(j)(27) <> "" Then
+                                Dim 自宅PC確認事項2 As String = data(j)(27).Replace("'", "''")
+                                aa += """自宅PC確認事項2"""
+                                bb += "'" + 自宅PC確認事項2 + "'"
+                                aa += ","
+                                bb += ","
+                            End If
+
+                            If data(j)(28) <> "" Then
+                                Dim 同意 As String = data(j)(28).Replace("'", "''")
+                                aa += """同意"""
+                                bb += "'" + 同意 + "'"
+                                aa += ","
+                                bb += ","
+                            End If
+
+                            If data(j)(29) <> "" Then
+                                Dim 持ち出す情報 As String = data(j)(29).Replace("'", "''")
+                                aa += """持ち出す情報"""
+                                bb += "'" + 持ち出す情報 + "'"
+                                aa += ","
+                                bb += ","
+                            End If
+
+                            If data(j)(30) <> "" Then
+                                Dim 所属長コメント As String = data(j)(30).Replace("'", "''")
+                                aa += """所属長コメント"""
+                                bb += "'" + 所属長コメント + "'"
+                                aa += ","
+                                bb += ","
+                            End If
+
+
+                            Dim ReMarks As String = data(j)(31).Replace("'", "''")
+                            aa += """備考"""
+                            bb += "'" + ReMarks + "'"
+                            aa += ","
+                            bb += ","
+
+                            aa += """処理"""
+                            bb += "'未処理'"
+                            aa += ","
+                            bb += ","
+
+                            aa += """バージョン"""
+                            bb += "'" + Version + "'"
+                            'aa += ","
+                            'bb += ","
+
+                            Dim Sql_Command2 As String = "SELECT ""職員番号"" FROM """ + HomeWorkTable +
+                                """ WHERE (""職員番号"" = '" + No + "' AND ""申請日"" = TIMESTAMP '" + DateTime1 + "' AND ""在宅勤務日1"" = DATE '" + Date1 + " ')"
+                            Dim tb2 As DataTable = db.ExecuteSql(Sql_Command2)
+                            Dim n2 As Integer = tb2.Rows.Count
+
+                            If n2 = 0 Then
+                                Sql_Command = "INSERT INTO """ + HomeWorkTable + """ (" + aa + ") VALUES (" + bb + ")"
+                                tb = db.ExecuteSql(Sql_Command)
+                            End If
+                        Next
+
+                        db.Disconnect()
+
+                        Dim file2 As String = outPath4 + "\" + System.IO.Path.GetFileName(ff(i))
+                        System.IO.File.Move(ff(i), file2)
+                    Else
+                        Dim file2 As String = delPath4 + "\" + System.IO.Path.GetFileName(ff(i))
+                        System.IO.File.Move(ff(i), file2)
+
+                    End If
+
+
+                End If
+            Next
+            ReadWorkFlow4 = 0
+
         End If
 
     End Function
