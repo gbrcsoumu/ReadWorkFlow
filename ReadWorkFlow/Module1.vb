@@ -116,7 +116,8 @@ Module Module1
                             aa += ","
                             bb += ","
 
-                            Dim Cat As String = data(j)(11).Replace("（変更前の日付を備考に記載）", "")
+                            'Dim Cat As String = data(j)(11).Replace("（変更前の日付を備考に記載）", "")
+                            Dim Cat As String = data(j)(11).Substring(0, 2)
                             aa += """申請区分"""
                             bb += "'" + Cat + "'"
                             aa += ","
@@ -284,7 +285,8 @@ Module Module1
                             aa += ","
                             bb += ","
 
-                            Dim Cat As String = data(j)(12).Replace("（変更・中止：内容等を備考欄に入力）", "")
+                            'Dim Cat As String = data(j)(12).Replace("（変更・中止：内容等を備考欄に入力）", "")
+                            Dim Cat As String = data(j)(12).Substring(0, 2)
                             aa += """申請区分"""
                             bb += "'" + Cat + "'"
                             aa += ","
@@ -523,7 +525,8 @@ Module Module1
                             aa += ","
                             bb += ","
 
-                            Dim Cat As String = data(j)(12).Replace("（変更・中止：理由を備考欄に入力）", "")
+                            'Dim Cat As String = data(j)(12).Replace("（変更・中止：理由を備考欄に入力）", "")
+                            Dim Cat As String = data(j)(12).Substring(0, 2)
                             aa += """申請区分"""
                             bb += "'" + Cat + "'"
                             aa += ","
@@ -814,7 +817,8 @@ Module Module1
                             aa += ","
                             bb += ","
 
-                            Dim Cat As String = data(j)(12).Replace("（変更前の日付を備考に記載）", "")
+                            'Dim Cat As String = data(j)(12).Replace("（備考欄に変更内容記載）", "")
+                            Dim Cat As String = data(j)(12).Substring(0, 2)
                             aa += """申請区分"""
                             bb += "'" + Cat + "'"
                             aa += ","
@@ -1067,7 +1071,8 @@ Module Module1
                             aa += ","
                             bb += ","
 
-                            Dim Cat As String = data(j)(12).Replace("（自己都合）", "")
+                            'Dim Cat As String = data(j)(12).Replace("（自己都合）", "")
+                            Dim Cat As String = data(j)(12).Substring(0, 2)
                             aa += """申請区分"""
                             bb += "'" + Cat + "'"
                             aa += ","
