@@ -32,6 +32,7 @@ Module Module1
     Public Const Version As String = "Ver 1.00"
 
     Sub Main()
+        Dim db As New OdbcDbIf
 
         If System.IO.Directory.Exists(outPath1) = False Then System.IO.Directory.CreateDirectory(outPath1)
         If System.IO.Directory.Exists(outPath2) = False Then System.IO.Directory.CreateDirectory(outPath2)
@@ -48,22 +49,33 @@ Module Module1
         'Dim File1 As String() = ReadCSV(Path1)
         'Dim File2 As String() = ReadCSV(Path2)
         ''Dim File3 As String() = ReadCSV(Path3)
+        Dim flag As Boolean = False
+        Try
+            db.Connect()
+            db.Disconnect()
+            flag = True
+        Catch ex As Exception
 
-        If ReadWorkFlow1(Path1) = 0 Then
+        End Try
 
+        If flag Then
+            If ReadWorkFlow1(Path1) = 0 Then
+
+            End If
+            If ReadWorkFlow2(Path2) = 0 Then
+
+            End If
+            If ReadWorkFlow3(Path3) = 0 Then
+
+            End If
+            If ReadWorkFlow4(Path4) = 0 Then
+
+            End If
+            If ReadWorkFlow5(Path5) = 0 Then
+
+            End If
         End If
-        If ReadWorkFlow2(Path2) = 0 Then
 
-        End If
-        If ReadWorkFlow3(Path3) = 0 Then
-
-        End If
-        If ReadWorkFlow4(Path4) = 0 Then
-
-        End If
-        If ReadWorkFlow5(Path5) = 0 Then
-
-        End If
 
     End Sub
 
@@ -124,12 +136,15 @@ Module Module1
                             bb += ","
 
                             Dim Kind1 As String, Kind2 As String, Kind As String
-                            Kind1 = data(j)(12).Replace("（備考欄に詳細記載）", "").Replace("/", vbCrLf)
-                            Kind2 = data(j)(13).Replace("（備考欄に詳細記載）", "").Replace("/", vbCrLf)
+                            Kind1 = data(j)(12).Replace("（備考欄に詳細記載）", "").Replace("/", vbCrLf).Replace("（要診断書）", "").Replace("（要証明書）", "")
+                            Kind2 = data(j)(13).Replace("（備考欄に詳細記載）", "").Replace("/", vbCrLf).Replace("（要診断書）", "").Replace("（要証明書）", "")
                             If Kind1 <> "" Then
                                 Kind = Kind1
                             Else
                                 Kind = Kind2
+                            End If
+                            If Kind.Contains("（") Then
+                                Kind = Kind.Substring(0, Kind.IndexOf("（"))
                             End If
                             aa += """種類"""
                             bb += "'" + Kind + "'"
