@@ -1,4 +1,13 @@
-﻿Imports Microsoft.VisualBasic.FileIO
+﻿'**************************************************************************************************
+'
+'       プログラム名：ReadWorkFlow      ver.1.0        2021.5   kanyama
+'
+'           NI Collaboのワークフロー（休暇等届、出張命令書、休日出勤命令書、在宅勤務許可申請）の
+'           データを自動的に読み込んで出退勤管理データベースに入力する。
+'
+'**************************************************************************************************
+
+Imports Microsoft.VisualBasic.FileIO
 
 Module Module1
     Public LoginID As String                                    ' FileMakerのログインID
@@ -10,45 +19,59 @@ Module Module1
     Public Const HomeWorkTable As String = "在宅勤務許可申請"   ' 在宅勤務許可申請のテーブル名
     Public Const FlexWorkTable As String = "時差出勤申請書"     ' 時差出勤申請書のテーブル名
 
-    Public Const Path1 As String = "C:\CSV\workflow1"
-    Public Const Path2 As String = "C:\CSV\workflow2"
-    Public Const Path3 As String = "C:\CSV\workflow3"
-    Public Const Path4 As String = "C:\CSV\workflow4"
-    Public Const Path5 As String = "C:\CSV\workflow5"
+    ' ========================================================= NI Collaboからのデータが保存されるフォルダー
+    Public Const Path1 As String = "C:\CSV\workflow1"           ' 休暇等届
+    Public Const Path2 As String = "C:\CSV\workflow2"           ' 出勤命令書
+    Public Const Path3 As String = "C:\CSV\workflow3"           ' 休日出勤命令書
+    Public Const Path4 As String = "C:\CSV\workflow4"           ' 在宅勤務許可申請
+    Public Const Path5 As String = "C:\CSV\workflow5"           ' 時差出勤申請書
 
-    Public Const outPath1 As String = "C:\CSV2\workflow1"
-    Public Const outPath2 As String = "C:\CSV2\workflow2"
-    Public Const outPath3 As String = "C:\CSV2\workflow3"
-    Public Const outPath4 As String = "C:\CSV2\workflow4"
-    Public Const outPath5 As String = "C:\CSV2\workflow5"
+    ' ========================================================= 読み込んだ後のデータが転送されるフォルダー
+    Public Const outPath1 As String = "C:\CSV2\workflow1"           ' 休暇等届
+    Public Const outPath2 As String = "C:\CSV2\workflow2"           ' 出勤命令書
+    Public Const outPath3 As String = "C:\CSV2\workflow3"           ' 休日出勤命令書
+    Public Const outPath4 As String = "C:\CSV2\workflow4"           ' 在宅勤務許可申請
+    Public Const outPath5 As String = "C:\CSV2\workflow5"           ' 時差出勤申請書
 
-    Public Const delPath1 As String = "C:\CSV3\workflow1"
-    Public Const delPath2 As String = "C:\CSV3\workflow2"
-    Public Const delPath3 As String = "C:\CSV3\workflow3"
-    Public Const delPath4 As String = "C:\CSV3\workflow4"
-    Public Const delPath5 As String = "C:\CSV3\workflow5"
+    ' ========================================================= 空のデータが転送されるフォルダー
+    Public Const delPath1 As String = "C:\CSV3\workflow1"           ' 休暇等届
+    Public Const delPath2 As String = "C:\CSV3\workflow2"           ' 出勤命令書
+    Public Const delPath3 As String = "C:\CSV3\workflow3"           ' 休日出勤命令書
+    Public Const delPath4 As String = "C:\CSV3\workflow4"           ' 在宅勤務許可申請
+    Public Const delPath5 As String = "C:\CSV3\workflow5"           ' 時差出勤申請書
 
 
     Public Const Version As String = "Ver 1.00"
 
     Sub Main()
-        Dim db As New OdbcDbIf
+        '
+        '==========================================================================================
+        '
+        '       メインプログラム
+        '
+        '       起動方法：コマンドプロンプトで以下のプログラムを実行する。
 
+        '       C:\Users\gbrcs\source\repos\ReadWorkFlow\ReadWorkFlow\bin\Release\ReadWorkFlow.exe
+
+        '==========================================================================================
+        '
+        Dim db As New OdbcDbIf      ' ODBCドライバーによるSQLコネクションオブジェクトの作成
+
+        ' CSV2フォルダーがない場合は作成する（CSV1フォルダーはNI Collaboによって作成される）
         If System.IO.Directory.Exists(outPath1) = False Then System.IO.Directory.CreateDirectory(outPath1)
         If System.IO.Directory.Exists(outPath2) = False Then System.IO.Directory.CreateDirectory(outPath2)
         If System.IO.Directory.Exists(outPath3) = False Then System.IO.Directory.CreateDirectory(outPath3)
         If System.IO.Directory.Exists(outPath4) = False Then System.IO.Directory.CreateDirectory(outPath4)
         If System.IO.Directory.Exists(outPath5) = False Then System.IO.Directory.CreateDirectory(outPath5)
 
+        ' CSV3フォルダーがない場合は作成する
         If System.IO.Directory.Exists(delPath1) = False Then System.IO.Directory.CreateDirectory(delPath1)
         If System.IO.Directory.Exists(delPath2) = False Then System.IO.Directory.CreateDirectory(delPath2)
         If System.IO.Directory.Exists(delPath3) = False Then System.IO.Directory.CreateDirectory(delPath3)
         If System.IO.Directory.Exists(delPath4) = False Then System.IO.Directory.CreateDirectory(delPath4)
         If System.IO.Directory.Exists(delPath5) = False Then System.IO.Directory.CreateDirectory(delPath5)
 
-        'Dim File1 As String() = ReadCSV(Path1)
-        'Dim File2 As String() = ReadCSV(Path2)
-        ''Dim File3 As String() = ReadCSV(Path3)
+        ' データベースの接続できるかどうかのチェック　接続できる場合はflagをTrue
         Dim flag As Boolean = False
         Try
             db.Connect()
@@ -58,20 +81,21 @@ Module Module1
 
         End Try
 
+        ' flagがTrueの場合はデータを読み込む
         If flag Then
-            If ReadWorkFlow1(Path1) = 0 Then
+            If ReadWorkFlow1(Path1) = 0 Then    ' 休暇等届
 
             End If
-            If ReadWorkFlow2(Path2) = 0 Then
+            If ReadWorkFlow2(Path2) = 0 Then    ' 出張命令書
 
             End If
-            If ReadWorkFlow3(Path3) = 0 Then
+            If ReadWorkFlow3(Path3) = 0 Then    ' 休日出勤命令書
 
             End If
-            If ReadWorkFlow4(Path4) = 0 Then
+            If ReadWorkFlow4(Path4) = 0 Then    ' 在宅勤務許可申請
 
             End If
-            If ReadWorkFlow5(Path5) = 0 Then
+            If ReadWorkFlow5(Path5) = 0 Then    ' 時差出勤申請書
 
             End If
         End If
@@ -80,14 +104,20 @@ Module Module1
     End Sub
 
     Function ReadWorkFlow1(ByVal path As String) As Integer
+        '
+        '==========================================================================================
+        '
+        '   休暇等届のデータを読み込む関数
+        '
+        '==========================================================================================
+        '
         Dim db As New OdbcDbIf
         Dim tb As DataTable
         Dim Sql_Command As String
 
         ReadWorkFlow1 = -1
         Dim WildCard1 As String
-        'Dim Count As Integer = 0
-        Dim ff() As String    ', flag() As Boolean
+        Dim ff() As String
 
         WildCard1 = "*.csv"
 
@@ -103,9 +133,6 @@ Module Module1
                     If data.Length > 1 Then
 
                         db.Connect()
-
-                        'Sql_Command2 = "SELECT * FROM """ + DateLogTable + """ WHERE (""職員番号"" = '" & value & "' AND ""日付"" = DATE '" + D1 + " ')"
-                        'tb2 = db.ExecuteSql(Sql_Command2)
 
                         For j As Integer = 1 To data.Length - 1
                             Dim aa As String = "", bb As String = ""
@@ -254,14 +281,20 @@ Module Module1
 
 
     Function ReadWorkFlow2(ByVal path As String) As Integer
+        '
+        '==========================================================================================
+        '
+        '   出張命令書のデータを読み込む関数
+        '
+        '==========================================================================================
+        '
         Dim db As New OdbcDbIf
         Dim tb As DataTable
         Dim Sql_Command As String
 
         ReadWorkFlow2 = -1
         Dim WildCard1 As String
-        'Dim Count As Integer = 0
-        Dim ff() As String    ', flag() As Boolean
+        Dim ff() As String
 
         WildCard1 = "*.csv"
 
@@ -493,14 +526,20 @@ Module Module1
 
 
     Function ReadWorkFlow3(ByVal path As String) As Integer
+        '
+        '==========================================================================================
+        '
+        '   休日出勤命令書のデータを読み込む関数
+        '
+        '==========================================================================================
+        '
         Dim db As New OdbcDbIf
         Dim tb As DataTable
         Dim Sql_Command As String
 
         ReadWorkFlow3 = -1
         Dim WildCard1 As String
-        'Dim Count As Integer = 0
-        Dim ff() As String    ', flag() As Boolean
+        Dim ff() As String
 
         WildCard1 = "*.csv"
 
@@ -784,14 +823,20 @@ Module Module1
     End Function
 
     Function ReadWorkFlow4(ByVal path As String) As Integer
+        '
+        '==========================================================================================
+        '
+        '   在宅勤務許可申請のデータを読み込む関数
+        '
+        '==========================================================================================
+        '
         Dim db As New OdbcDbIf
         Dim tb As DataTable
         Dim Sql_Command As String
 
         ReadWorkFlow4 = -1
         Dim WildCard1 As String
-        'Dim Count As Integer = 0
-        Dim ff() As String    ', flag() As Boolean
+        Dim ff() As String
 
         WildCard1 = "*.csv"
 
@@ -1038,14 +1083,20 @@ Module Module1
     End Function
 
     Function ReadWorkFlow5(ByVal path As String) As Integer
+        '
+        '==========================================================================================
+        '
+        '   時差出勤申請書のデータを読み込む関数
+        '
+        '==========================================================================================
+        '
         Dim db As New OdbcDbIf
         Dim tb As DataTable
         Dim Sql_Command As String
 
         ReadWorkFlow5 = -1
         Dim WildCard1 As String
-        'Dim Count As Integer = 0
-        Dim ff() As String    ', flag() As Boolean
+        Dim ff() As String
 
         WildCard1 = "*.csv"
 
@@ -1062,8 +1113,6 @@ Module Module1
 
                         db.Connect()
 
-                        'Sql_Command2 = "SELECT * FROM """ + DateLogTable + """ WHERE (""職員番号"" = '" & value & "' AND ""日付"" = DATE '" + D1 + " ')"
-                        'tb2 = db.ExecuteSql(Sql_Command2)
 
                         For j As Integer = 1 To data.Length - 1
                             Dim aa As String = "", bb As String = ""
