@@ -18,6 +18,7 @@ Module Module1
     Public Const HolidayWorkTable As String = "休日出勤命令書"  ' 休日出勤命令書のテーブル名
     Public Const HomeWorkTable As String = "在宅勤務許可申請"   ' 在宅勤務許可申請のテーブル名
     Public Const FlexWorkTable As String = "時差出勤申請書"     ' 時差出勤申請書のテーブル名
+    Public Const NameTable As String = "NI Collabo氏名修正一覧" ' 名前修正のテーブル名
 
     ' ========================================================= NI Collaboからのデータが保存されるフォルダー
     Public Const Path1 As String = "C:\CSV\workflow1"           ' 休暇等届
@@ -103,6 +104,27 @@ Module Module1
 
     End Sub
 
+    Function NameChange(ByVal No As String) As String
+
+        NameChange = ""
+
+        If No <> "" Then
+            Dim db As New OdbcDbIf
+            Dim tb As DataTable
+            Dim Sql_Command As String
+            db.Connect()
+            Sql_Command = "SELECT ""修正氏名"" FROM """ + NameTable + """ WHERE (""職員番号"" = '" + No + "')"
+            tb = db.ExecuteSql(Sql_Command)
+            Dim n As Integer = tb.Rows.Count
+            If n > 0 Then
+                NameChange = tb.Rows(0).Item("修正氏名").ToString
+            End If
+            db.Disconnect()
+
+        End If
+
+    End Function
+
     Function ReadWorkFlow1(ByVal path As String) As Integer
         '
         '==========================================================================================
@@ -143,7 +165,14 @@ Module Module1
                             aa += ","
                             bb += ","
 
-                            Dim Name As String = data(j)(5)
+                            Dim Name10 = NameChange(No)
+                            Dim Name As String
+                            If Name10 <> "" Then
+                                Name = Name10
+                            Else
+                                Name = data(j)(5)
+                            End If
+                            'Dim Name As String = data(j)(5)
                             aa += """職員名"""
                             bb += "'" + Name + "'"
                             aa += ","
@@ -321,7 +350,14 @@ Module Module1
                             aa += ","
                             bb += ","
 
-                            Dim Name As String = data(j)(5)
+                            Dim Name10 = NameChange(No)
+                            Dim Name As String
+                            If Name10 <> "" Then
+                                Name = Name10
+                            Else
+                                Name = data(j)(5)
+                            End If
+                            'Dim Name As String = data(j)(5)
                             aa += """職員名"""
                             bb += "'" + Name + "'"
                             aa += ","
@@ -567,7 +603,14 @@ Module Module1
                             aa += ","
                             bb += ","
 
-                            Dim Name As String = data(j)(5)
+                            Dim Name10 = NameChange(No)
+                            Dim Name As String
+                            If Name10 <> "" Then
+                                Name = Name10
+                            Else
+                                Name = data(j)(5)
+                            End If
+                            'Dim Name As String = data(j)(5)
                             aa += """職員名"""
                             bb += "'" + Name + "'"
                             aa += ","
@@ -865,7 +908,14 @@ Module Module1
                             aa += ","
                             bb += ","
 
-                            Dim Name As String = data(j)(5)
+                            Dim Name10 = NameChange(No)
+                            Dim Name As String
+                            If Name10 <> "" Then
+                                Name = Name10
+                            Else
+                                Name = data(j)(5)
+                            End If
+                            'Dim Name As String = data(j)(5)
                             aa += """職員名"""
                             bb += "'" + Name + "'"
                             aa += ","
@@ -1123,7 +1173,14 @@ Module Module1
                             aa += ","
                             bb += ","
 
-                            Dim Name As String = data(j)(5)
+                            Dim Name10 = NameChange(No)
+                            Dim Name As String
+                            If Name10 <> "" Then
+                                Name = Name10
+                            Else
+                                Name = data(j)(5)
+                            End If
+                            'Dim Name As String = data(j)(5)
                             aa += """職員名"""
                             bb += "'" + Name + "'"
                             aa += ","
