@@ -19,6 +19,7 @@ Module Module1
     Public Const HomeWorkTable As String = "在宅勤務許可申請"   ' 在宅勤務許可申請のテーブル名
     Public Const FlexWorkTable As String = "時差出勤申請書"     ' 時差出勤申請書のテーブル名
     Public Const NameTable As String = "NI Collabo氏名修正一覧" ' 名前修正のテーブル名
+    Public Const LogTable As String = "出退勤ログ"
 
     ' ========================================================= NI Collaboからのデータが保存されるフォルダー
     Public Const Path1 As String = "C:\CSV\workflow1"           ' 休暇等届
@@ -158,6 +159,8 @@ Module Module1
 
                         For j As Integer = 1 To data.Length - 1
                             Dim aa As String = "", bb As String = ""
+                            Dim body As String = ""             '=============
+                            Dim doc As String = "休暇等届"      '=============
 
                             Dim No As String = data(j)(21)
                             aa += """職員番号"""
@@ -190,22 +193,41 @@ Module Module1
                             bb += "'" + Cat + "'"
                             aa += ","
                             bb += ","
+                            body += "申請区分:" + Cat + "," '=============
+
+                            Dim Unit As String
+                            If data(j)(12).Contains("（時間単位）") Or data(j)(13).Contains("（時間単位）") Then
+                                Unit = "時間"
+                            Else
+                                If data(j)(13).Contains("早退・遅刻・私用外出") Then
+                                    Unit = "時間"
+                                Else
+                                    Unit = "日"
+                                End If
+
+                            End If
+                            aa += """申請単位"""
+                            bb += "'" + Unit + "'"
+                            aa += ","
+                            bb += ","
+                            body += "申請単位:" + Unit     '=============
 
                             Dim Kind1 As String, Kind2 As String, Kind As String
-                            Kind1 = data(j)(12).Replace("（備考欄に詳細記載）", "").Replace("/", vbCrLf).Replace("（要診断書）", "").Replace("（要証明書）", "")
-                            Kind2 = data(j)(13).Replace("（備考欄に詳細記載）", "").Replace("/", vbCrLf).Replace("（要診断書）", "").Replace("（要証明書）", "")
+                            Kind1 = data(j)(12).Replace("（備考欄に詳細記載）", "").Replace("/", vbCrLf).Replace("（要診断書）", "").Replace("（要証明書）", "").Replace("（終日、半日）", "")
+                            Kind2 = data(j)(13).Replace("（備考欄に詳細記載）", "").Replace("/", vbCrLf).Replace("（要診断書）", "").Replace("（要証明書）", "").Replace("（終日、半日）", "")
                             If Kind1 <> "" Then
                                 Kind = Kind1
                             Else
                                 Kind = Kind2
                             End If
-                            If Kind.Contains("（") Then
-                                Kind = Kind.Substring(0, Kind.IndexOf("（"))
-                            End If
+                            'If Kind.Contains("（") Then
+                            '    Kind = Kind.Substring(0, Kind.IndexOf("（"))
+                            'End If
                             aa += """種類"""
                             bb += "'" + Kind + "'"
                             aa += ","
                             bb += ","
+                            body += "種類:" + Kind + ","  '=============
 
                             Dim StDate As String, EdDate As String
                             Dim StTime As String, EdTime As String
@@ -241,6 +263,7 @@ Module Module1
                                 aa += ","
                                 bb += ","
                             End If
+                            body += "期間:" + StDate + ":" + StTime + "-" + EdDate + ":" + EdTime + ","   '=============
 
                             Dim DayCount As String = data(j)(18)
                             If DayCount = "" Then DayCount = "0"
@@ -256,9 +279,21 @@ Module Module1
                             aa += ","
                             bb += ","
 
-                            Dim TimeCount As String = data(j)(24)
-                            aa += """今回休暇時間"""
-                            bb += "'" + TimeCount + "'"
+                            Dim TimeCount0 As String = data(j)(24)
+                            aa += """欠勤時間"""
+                            bb += "'" + TimeCount0 + "'"
+                            aa += ","
+                            bb += ","
+
+                            Dim TimeCount1 As String = data(j)(25)
+                            aa += """休暇時間有給"""
+                            bb += "'" + TimeCount1 + "'"
+                            aa += ","
+                            bb += ","
+
+                            Dim TimeCount2 As String = data(j)(26)
+                            aa += """休暇時間育看"""
+                            bb += "'" + TimeCount2 + "'"
                             aa += ","
                             bb += ","
 
@@ -267,6 +302,7 @@ Module Module1
                             bb += "'" + ReMarks + "'"
                             aa += ","
                             bb += ","
+                            body += "備考:" + ReMarks     '=============
 
                             aa += """処理"""
                             bb += "'未処理'"
@@ -287,12 +323,19 @@ Module Module1
                                 Sql_Command = "INSERT INTO """ + HolidayTable + """ (" + aa + ") VALUES (" + bb + ")"
                                 tb = db.ExecuteSql(Sql_Command)
                             End If
+
+                            Dim ID As String = data(j)(0)
+                            ' ログの記録
+                            Call SaveLog(db, DateTime1, No, doc, body, ID)  '=============
+
                         Next
 
                         db.Disconnect()
 
                         Dim file2 As String = outPath1 + "\" + System.IO.Path.GetFileName(ff(i))
                         System.IO.File.Move(ff(i), file2)
+
+
                     Else
                         Dim file2 As String = delPath1 + "\" + System.IO.Path.GetFileName(ff(i))
                         System.IO.File.Move(ff(i), file2)
@@ -343,6 +386,8 @@ Module Module1
 
                         For j As Integer = 1 To data.Length - 1
                             Dim aa As String = "", bb As String = ""
+                            Dim body As String = ""
+                            Dim doc As String = "出張命令書"
 
                             Dim No As String = data(j)(11)
                             aa += """職員番号"""
@@ -375,7 +420,7 @@ Module Module1
                             bb += "'" + Cat + "'"
                             aa += ","
                             bb += ","
-
+                            body += "申請区分:" + Cat + "," '=============
 
 
                             Dim StDate As String, EdDate As String
@@ -412,6 +457,7 @@ Module Module1
                                 aa += ","
                                 bb += ","
                             End If
+                            body += "期間:" + StDate + ":" + StTime + "-" + EdDate + ":" + EdTime + ","   '=============
 
                             Dim Zenpaku As String = data(j)(19)
                             aa += """前泊・後泊"""
@@ -425,14 +471,16 @@ Module Module1
                             bb += "'" + Dest1 + "'"
                             aa += ","
                             bb += ","
+                            body += "行先＿所内:" + Dest1 + ","  '=============
 
-                            Dim Dest2 As String = data(j)(22)
+                            Dim Dest2 As String = data(j)(22).Replace("'", "''")
                             aa += """行先＿所外"""
                             bb += "'" + Dest2 + "'"
                             aa += ","
                             bb += ","
+                            body += "行先＿所外:" + Dest2 + ","  '=============
 
-                            Dim Address As String = data(j)(23)
+                            Dim Address As String = data(j)(23).Replace("'", "''")
                             aa += """行先＿所在地"""
                             bb += "'" + Address + "'"
                             aa += ","
@@ -456,6 +504,7 @@ Module Module1
                             bb += "'" + ReMarks + "'"
                             aa += ","
                             bb += ","
+                            body += "備考:" + ReMarks     '=============
 
                             Dim Member As String = data(j)(31)
                             aa += """同行者の有無"""
@@ -540,6 +589,10 @@ Module Module1
                                 tb = db.ExecuteSql(Sql_Command)
                             End If
 
+                            ' ログの記録
+                            Dim ID As String = data(j)(0)
+                            Call SaveLog(db, DateTime1, No, doc, body, ID)  '=============
+
                         Next
 
                         db.Disconnect()
@@ -595,6 +648,9 @@ Module Module1
 
                         For j As Integer = 1 To data.Length - 1
                             Dim aa As String = "", bb As String = ""
+                            Dim body As String = ""             '=============
+                            Dim doc As String = "休日出勤命令書"      '=============
+
                             Dim WorkDate1 As String
 
                             Dim No As String = data(j)(11)
@@ -628,6 +684,7 @@ Module Module1
                             bb += "'" + Cat + "'"
                             aa += ","
                             bb += ","
+                            body += "申請区分:" + Cat + "," '=============
 
                             If data(j)(13) <> "" Then
                                 WorkDate1 = data(j)(13).Replace("/", "-")
@@ -635,7 +692,9 @@ Module Module1
                                 bb += "DATE '" + WorkDate1 + "'"
                                 aa += ","
                                 bb += ","
+                                body += "休日出勤日1:" + WorkDate1 + ","   '============
                             End If
+
 
                             If data(j)(14) <> "" Then
                                 Dim StTime1 As String = data(j)(14) + ":00"
@@ -659,6 +718,7 @@ Module Module1
                                 bb += "DATE '" + SubDate1 + "'"
                                 aa += ","
                                 bb += ","
+                                body += "振替休日1:" + SubDate1 + ","   '============
                             End If
 
                             Dim DayLength1 As String = data(j)(36)
@@ -673,6 +733,7 @@ Module Module1
                                 bb += "DATE '" + WorkDate2 + "'"
                                 aa += ","
                                 bb += ","
+                                body += "休日出勤日1:" + WorkDate1 + ","   '============
                             End If
 
                             If data(j)(18) <> "" Then
@@ -697,6 +758,7 @@ Module Module1
                                 bb += "DATE '" + SubDate2 + "'"
                                 aa += ","
                                 bb += ","
+                                body += "振替休日2:" + SubDate2 + ","   '============
                             End If
 
                             Dim DayLength2 As String = data(j)(37)
@@ -705,11 +767,12 @@ Module Module1
                             aa += ","
                             bb += ","
 
-                            Dim Job As String = data(j)(21)
+                            Dim Job As String = data(j)(21).Replace("'", "''")
                             aa += """用務"""
                             bb += "'" + Job + "'"
                             aa += ","
                             bb += ","
+                            body += "用務:" + Job + ","   '============
 
                             Dim TriFlag As String = data(j)(22)
                             aa += """出張の有無"""
@@ -729,19 +792,19 @@ Module Module1
                             aa += ","
                             bb += ","
 
-                            Dim Dest2 As String = data(j)(24)
+                            Dim Dest2 As String = data(j)(24).Replace("'", "''")
                             aa += """行先＿所外"""
                             bb += "'" + Dest2 + "'"
                             aa += ","
                             bb += ","
 
-                            Dim Address As String = data(j)(39)
+                            Dim Address As String = data(j)(39).Replace("'", "''")
                             aa += """所外所在地"""
                             bb += "'" + Address + "'"
                             aa += ","
                             bb += ","
 
-                            Dim Method As String = data(j)(38)
+                            Dim Method As String = data(j)(38).Replace("'", "''")
                             aa += """移動手段"""
                             bb += "'" + Method + "'"
                             aa += ","
@@ -821,6 +884,7 @@ Module Module1
                             bb += "'" + ReMarks + "'"
                             aa += ","
                             bb += ","
+                            body += "備考:" + ReMarks     '=============
 
                             aa += """処理"""
                             bb += "'未処理'"
@@ -845,6 +909,9 @@ Module Module1
                                 tb = db.ExecuteSql(Sql_Command)
                             End If
 
+                            ' ログの記録
+                            Dim ID As String = data(j)(0)
+                            Call SaveLog(db, DateTime1, No, doc, body, ID)  '=============
                         Next
 
                         db.Disconnect()
@@ -900,7 +967,13 @@ Module Module1
                         'tb2 = db.ExecuteSql(Sql_Command2)
 
                         For j As Integer = 1 To data.Length - 1
+
+                            'If data(j)(14) <> "" Or data(j)(15) <> "" Or data(j)(16) <> "" Or data(j)(17) <> "" Then
+
+
                             Dim aa As String = "", bb As String = ""
+                            Dim body As String = ""             '=============
+                            Dim doc As String = "在宅勤務許可申請"      '=============
 
                             Dim No As String = data(j)(13)
                             aa += """職員番号"""
@@ -933,6 +1006,7 @@ Module Module1
                             bb += "'" + Cat + "'"
                             aa += ","
                             bb += ","
+                            body += "申請区分:" + Cat + "," '=============
 
                             'Dim Kind1 As String, Kind2 As String, Kind As String
                             'Kind1 = data(j)(12).Replace("（備考欄に詳細記載）", "").Replace("/", vbCrLf)
@@ -955,6 +1029,7 @@ Module Module1
                                 bb += "DATE '" + Date1 + "'"
                                 aa += ","
                                 bb += ","
+                                body += "在宅勤務日1:" + Date1 + "," '=============
                             End If
 
                             If data(j)(15) <> "" Then
@@ -963,6 +1038,7 @@ Module Module1
                                 bb += "DATE '" + Date2 + "'"
                                 aa += ","
                                 bb += ","
+                                body += "在宅勤務日2:" + Date2 + "," '=============
                             End If
 
                             If data(j)(16) <> "" Then
@@ -971,6 +1047,7 @@ Module Module1
                                 bb += "DATE '" + Date3 + "'"
                                 aa += ","
                                 bb += ","
+                                body += "在宅勤務日3:" + Date3 + "," '=============
                             End If
 
                             If data(j)(17) <> "" Then
@@ -979,6 +1056,7 @@ Module Module1
                                 bb += "DATE '" + Date4 + "'"
                                 aa += ","
                                 bb += ","
+                                body += "在宅勤務日4:" + Date4 + "," '=============
                             End If
 
                             If data(j)(18) <> "" Then
@@ -1091,6 +1169,7 @@ Module Module1
                             bb += "'" + ReMarks + "'"
                             aa += ","
                             bb += ","
+                            body += "備考:" + ReMarks     '=============
 
                             aa += """処理"""
                             bb += "'未処理'"
@@ -1102,15 +1181,26 @@ Module Module1
                             'aa += ","
                             'bb += ","
 
-                            Dim Sql_Command2 As String = "SELECT ""職員番号"" FROM """ + HomeWorkTable +
+                            Dim n2 As Integer
+                            If Date1 <> "" Then
+                                Dim Sql_Command2 As String = "SELECT ""職員番号"" FROM """ + HomeWorkTable +
                                 """ WHERE (""職員番号"" = '" + No + "' AND ""申請日"" = TIMESTAMP '" + DateTime1 + "' AND ""在宅勤務日1"" = DATE '" + Date1 + " ')"
-                            Dim tb2 As DataTable = db.ExecuteSql(Sql_Command2)
-                            Dim n2 As Integer = tb2.Rows.Count
+                                Dim tb2 As DataTable = db.ExecuteSql(Sql_Command2)
+                                n2 = tb2.Rows.Count
+                            Else
+                                n2 = 0
+                            End If
 
                             If n2 = 0 Then
                                 Sql_Command = "INSERT INTO """ + HomeWorkTable + """ (" + aa + ") VALUES (" + bb + ")"
                                 tb = db.ExecuteSql(Sql_Command)
                             End If
+
+
+                            ' ログの記録
+                            Dim ID As String = data(j)(0)
+                            Call SaveLog(db, DateTime1, No, doc, body, ID)  '=============
+
                         Next
 
                         db.Disconnect()
@@ -1166,6 +1256,8 @@ Module Module1
 
                         For j As Integer = 1 To data.Length - 1
                             Dim aa As String = "", bb As String = ""
+                            Dim body As String = ""             '=============
+                            Dim doc As String = "時差出勤申請書"      '=============
 
                             Dim No As String = data(j)(15)
                             aa += """職員番号"""
@@ -1198,6 +1290,7 @@ Module Module1
                             bb += "'" + Cat + "'"
                             aa += ","
                             bb += ","
+                            body += "申請区分:" + Cat + "," '=============
 
                             Dim StDate As String, EdDate As String
 
@@ -1217,17 +1310,23 @@ Module Module1
                                 bb += ","
                             End If
 
+                            body += "期間:" + StDate + "-" + EdDate + ","   '=============
+
                             Dim Kind As String = data(j)(16).Replace("'", "''")
                             aa += """勤務時間帯"""
                             bb += "'" + Kind + "'"
                             aa += ","
                             bb += ","
 
+                            body += "勤務時間帯:" + Kind + "," '=============
+
+
                             Dim ReMarks As String = data(j)(17).Replace("'", "''")
                             aa += """備考"""
                             bb += "'" + ReMarks + "'"
                             aa += ","
                             bb += ","
+                            body += "備考:" + ReMarks     '=============
 
                             aa += """処理"""
                             bb += "'未処理'"
@@ -1248,6 +1347,12 @@ Module Module1
                                 Sql_Command = "INSERT INTO """ + FlexWorkTable + """ (" + aa + ") VALUES (" + bb + ")"
                                 tb = db.ExecuteSql(Sql_Command)
                             End If
+
+
+                            ' ログの記録
+                            Dim ID As String = data(j)(0)
+                            Call SaveLog(db, DateTime1, No, doc, body, ID)  '=============
+
                         Next
 
                         db.Disconnect()
@@ -1339,5 +1444,57 @@ Module Module1
             End If
         End Try
     End Function
+
+
+    Public Sub SaveLog(ByRef db As OdbcDbIf, ByVal DateTime1 As String, ByVal No As String, ByVal doc As String, ByVal body As String, ByVal ID As String)
+        'Dim db As New OdbcDbIf
+        Dim tb As DataTable
+        Dim Sql_Command As String
+        Dim aa As String = "", bb As String = ""
+
+        If No <> "" Then
+            aa += """職員番号"""
+            bb += "'" + No + "'"
+            aa += ","
+            bb += ","
+        End If
+
+        If DateTime1 <> "" Then
+            aa += """申請日時"""
+            bb += "TIMESTAMP '" + DateTime1 + "'"
+            aa += ","
+            bb += ","
+        End If
+
+        If doc <> "" Then
+            aa += """届出の種類"""
+            bb += "'" + doc + "'"
+            aa += ","
+            bb += ","
+        End If
+
+        If ID <> "" Then
+            aa += """管理番号"""
+            bb += "'" + ID + "'"
+            aa += ","
+            bb += ","
+        End If
+
+        If body <> "" Then
+            aa += """届出の内容"""
+            bb += "'" + body + "'"
+            'aa += ","
+            'bb += ","
+        End If
+
+        If aa <> "" And bb <> "" Then
+            'db.Connect()
+            Sql_Command = "INSERT INTO """ + LogTable + """ (" + aa + ") VALUES (" + bb + ")"
+            tb = db.ExecuteSql(Sql_Command)
+            'db.Disconnect()
+        End If
+
+
+    End Sub
 
 End Module
