@@ -162,7 +162,7 @@ Module Module1
                             Dim body As String = ""             '=============
                             Dim doc As String = "休暇等届"      '=============
 
-                            Dim No As String = data(j)(21)
+                            Dim No As String = data(j)(20)
                             aa += """職員番号"""
                             bb += "'" + No + "'"
                             aa += ","
@@ -272,32 +272,32 @@ Module Module1
                             aa += ","
                             bb += ","
 
-                            Dim TotalDayCount As String = data(j)(19)
-                            If TotalDayCount = "" Then TotalDayCount = "0"
-                            aa += """有給休暇累計"""
-                            bb += TotalDayCount
-                            aa += ","
-                            bb += ","
+                            'Dim TotalDayCount As String = data(j)(19)
+                            'If TotalDayCount = "" Then TotalDayCount = "0"
+                            'aa += """有給休暇累計"""
+                            'bb += TotalDayCount
+                            'aa += ","
+                            'bb += ","
 
-                            Dim TimeCount0 As String = data(j)(24)
+                            Dim TimeCount0 As String = data(j)(23)
                             aa += """欠勤時間"""
                             bb += "'" + TimeCount0 + "'"
                             aa += ","
                             bb += ","
 
-                            Dim TimeCount1 As String = data(j)(25)
+                            Dim TimeCount1 As String = data(j)(24)
                             aa += """休暇時間有給"""
                             bb += "'" + TimeCount1 + "'"
                             aa += ","
                             bb += ","
 
-                            Dim TimeCount2 As String = data(j)(26)
+                            Dim TimeCount2 As String = data(j)(25)
                             aa += """休暇時間育看"""
                             bb += "'" + TimeCount2 + "'"
                             aa += ","
                             bb += ","
 
-                            Dim ReMarks As String = data(j)(20).Replace("'", "''")
+                            Dim ReMarks As String = data(j)(19).Replace("'", "''")
                             aa += """備考"""
                             bb += "'" + ReMarks + "'"
                             aa += ","
